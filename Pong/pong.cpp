@@ -10,6 +10,7 @@
 #define SPEED HEIGHT/50
 #define PI 3.14159265358979323846
 bool quit = false;
+bool p2 = false;
 int frameCount, timerFPS, lastFrame, fps, scorel; // fix for garbage text on screen
 
 // Create window and renderer
@@ -87,8 +88,10 @@ void update() {
 		velX=SIZE*cos(bounce);
 		velY=SIZE*-sin(bounce);
 	}
-	if(ball.y > r_paddle.y+(r_paddle.h/2)) r_paddle.y+=SPEED;
-	if(ball.y < r_paddle.y+(r_paddle.h/2)) r_paddle.y-=SPEED;
+	if (!p2) {
+		if(ball.y > r_paddle.y+(r_paddle.h/2)) r_paddle.y+=SPEED;
+		if(ball.y < r_paddle.y+(r_paddle.h/2)) r_paddle.y-=SPEED;
+	}
 	if(ball.x<=0) {
 		r_s++;serve();
 	}
@@ -115,8 +118,18 @@ void input() {
     }
 	const bool *keystates = SDL_GetKeyboardState(NULL);
 	if(keystates[SDL_SCANCODE_ESCAPE]) quit=true;
-	if(keystates[SDL_SCANCODE_UP]) l_paddle.y-=SPEED;
-	if(keystates[SDL_SCANCODE_DOWN]) l_paddle.y+=SPEED;
+	if(keystates[SDL_SCANCODE_W]) l_paddle.y-=SPEED;
+	if(keystates[SDL_SCANCODE_S]) l_paddle.y+=SPEED;
+	if (p2) {
+		if(keystates[SDL_SCANCODE_2]) p2=false;
+		if(keystates[SDL_SCANCODE_UP]) r_paddle.y-=SPEED;
+		if(keystates[SDL_SCANCODE_DOWN]) r_paddle.y+=SPEED;
+	}
+	else {
+		if(keystates[SDL_SCANCODE_2]) p2=true;
+		if(keystates[SDL_SCANCODE_UP]) l_paddle.y-=SPEED;
+		if(keystates[SDL_SCANCODE_DOWN]) l_paddle.y+=SPEED;
+	}
 }
 
 void render() {
@@ -130,6 +143,14 @@ void render() {
 	}
 	
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White objects
+	// Draw the net
+	for (int y = 0; y < HEIGHT; ++y)
+	{
+		if (y % 10)
+		{
+			SDL_RenderPoint(renderer, WIDTH / 2, y);
+		}
+	}
 	SDL_RenderFillRect(renderer, &l_paddle);
 	SDL_RenderFillRect(renderer, &r_paddle);
 	SDL_RenderFillRect(renderer, &ball);
@@ -171,9 +192,9 @@ int main(int argc, char* argv[]) {
     		fps=frameCount;
     		frameCount=0;
     	}
-        update();
-        input();
-    	render();
+		update();
+		input();
+		render();
     }
 
     // Clean up
